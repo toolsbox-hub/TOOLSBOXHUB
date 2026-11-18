@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>QuickTools: Free Online Tools</title>
+<meta name="description" content="Free online age calculator, image resizer and word counter. No signup needed.">
+<style>
+:root{--bg:#f3f6f4;--card:#fff;--ink:#14231c;--muted:#5a6b62;--brand:#0f7a5c;--line:#d5dfd9}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1713;--card:#17231d;--ink:#e8f1ec;--muted:#9bb0a5;--brand:#3fcf9f;--line:#2a3b33}}
+*{box-sizing:border-box}
+body{margin:0;font-family:Georgia,'Times New Roman',serif;background:var(--bg);color:var(--ink);line-height:1.6}
+.wrap{max-width:760px;margin:0 auto;padding:20px}
+header{padding:28px 0 8px}
+h1{font-size:2rem;margin:0 0 6px;letter-spacing:-.5px}
+header p{margin:0;color:var(--muted)}
+nav{display:flex;gap:8px;flex-wrap:wrap;margin:20px 0}
+nav button{font:inherit;padding:10px 16px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;cursor:pointer}
+nav button[aria-selected=true]{background:var(--brand);border-color:var(--brand);color:#fff}
+nav button:focus-visible,input:focus-visible,textarea:focus-visible,.go:focus-visible{outline:3px solid var(--brand);outline-offset:2px}
+section.tool{display:none;background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:22px}
+section.tool.on{display:block}
+h2{margin:0 0 14px;font-size:1.3rem}
+label{display:block;font-size:.95rem;margin:12px 0 4px;color:var(--muted)}
+input,textarea{width:100%;font:inherit;padding:10px;border:1.5px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)}
+textarea{min-height:160px}
+.row{display:flex;gap:12px;flex-wrap:wrap}
+.row>div{flex:1;min-width:120px}
+.go{font:inherit;margin-top:16px;padding:11px 22px;border:0;border-radius:8px;background:var(--brand);color:#fff;cursor:pointer}
+.out{margin-top:16px;padding:14px;border-radius:8px;background:var(--bg);min-height:24px}
+.stats{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.stats div{flex:1;min-width:90px;background:var(--bg);padding:10px;border-radius:8px;text-align:center}
+.stats b{display:block;font-size:1.5rem;color:var(--brand)}
+.ad{margin:24px 0;padding:18px;text-align:center;border:1.5px dashed var(--line);color:var(--muted);border-radius:8px;font-size:.9rem}
+footer{padding:24px 0 40px;color:var(--muted);font-size:.9rem;text-align:center}
+img#prev{max-width:100%;margin-top:12px;border-radius:8px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<h1>QuickTools</h1>
+<p>Free online tools. No signup, no download.</p>
+</header>
+
+<nav role="tablist">
+<button role="tab" aria-selected="true" data-t="age">Age calculator</button>
+<button role="tab" aria-selected="false" data-t="img">Image resizer</button>
+<button role="tab" aria-selected="false" data-t="words">Word counter</button>
+</nav>
+
+<section class="tool on" id="age">
+<h2>Age calculator</h2>
+<label for="dob">Date of birth</label>
+<input type="date" id="dob">
+<button class="go" onclick="calcAge()">Calculate age</button>
+<div class="out" id="ageOut" aria-live="polite">Choose your date of birth.</div>
+</section>
+
+<section class="tool" id="img">
+<h2>Image resizer</h2>
+<label for="file">Choose an image</label>
+<input type="file" id="file" accept="image/*">
+<div class="row">
+<div><label for="w">Width (px)</label><input type="number" id="w" min="1"></div>
+<div><label for="h">Height (px)</label><input type="number" id="h" min="1"></div>
+</div>
+<button class="go" onclick="resizeImg()">Resize image</button>
+<div class="out" id="imgOut" aria-live="polite">Your resized image will appear here.</div>
+</section>
+
+<section class="tool" id="words">
+<h2>Word counter</h2>
+<label for="txt">Type or paste your text</label>
+<textarea id="txt" oninput="countWords()"></textarea>
+<div class="stats">
+<div><b id="cW">0</b>Words</div>
+<div><b id="cC">0</b>Characters</div>
+<div><b id="cS">0</b>Sentences</div>
+</div>
+</section>
+
+<div class="ad">Ad space: paste your Google AdSense code here</div>
+
+<footer>&copy; 2026 QuickTools. Your files never leave your device.</footer>
+</div>
+
+<script>
+const tabs=document.querySelectorAll('nav button');
+tabs.forEach(b=>b.onclick=()=>{
+  tabs.forEach(x=>x.setAttribute('aria-selected',x===b));
+  document.querySelectorAll('.tool').forEach(s=>s.classList.toggle('on',s.id===b.dataset.t));
+});
+
+function calcAge(){
+  const v=document.getElementById('dob').value,o=document.getElementById('ageOut');
+  if(!v){o.textContent='Please choose a date first.';return}
+  const d=new Date(v),n=new Date();
+  if(d>n){o.textContent='Date of birth cannot be in the future.';return}
+  let y=n.getFullYear()-d.getFullYear(),m=n.getMonth()-d.getMonth(),dd=n.getDate()-d.getDate();
+  if(dd<0){m--;dd+=new Date(n.getFullYear(),n.getMonth(),0).getDate()}
+  if(m<0){y--;m+=12}
+  const days=Math.floor((n-d)/864e5);
+  o.textContent=y+' years, '+m+' months, '+dd+' days ('+days.toLocaleString()+' days in total)';
+}
+
+let srcImg=null;
+document.getElementById('file').onchange=e=>{
+  const f=e.target.files[0];if(!f)return;
+  const im=new Image();
+  im.onload=()=>{srcImg=im;document.getElementById('w').value=im.width;document.getElementById('h').value=im.height};
+  im.src=URL.createObjectURL(f);
+};
+function resizeImg(){
+  const o=document.getElementById('imgOut');
+  if(!srcImg){o.textContent='Please choose an image first.';return}
+  const w=+document.getElementById('w').value,h=+document.getElementById('h').value;
+  if(!w||!h){o.textContent='Enter a valid width and height.';return}
+  const c=document.createElement('canvas');c.width=w;c.height=h;
+  c.getContext('2d').drawImage(srcImg,0,0,w,h);
+  const url=c.toDataURL('image/jpeg',.92);
+  o.innerHTML='<a class="go" style="display:inline-block;text-decoration:none" download="resized.jpg" href="'+url+'">Download image</a><br><img id="prev" alt="Resized image preview" src="'+url+'">';
+}
+
+function countWords(){
+  const t=document.getElementById('txt').value.trim();
+  document.getElementById('cW').textContent=t?t.split(/\s+/).length:0;
+  document.getElementById('cC').textContent=document.getElementById('txt').value.length;
+  document.getElementById('cS').textContent=t?(t.match(/[^.!?]+[.!?]+/g)||[t]).length:0;
+}
+</script>
+</body>
+</html>
